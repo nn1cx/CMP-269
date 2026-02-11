@@ -13,12 +13,10 @@ public class gradebook {
         String name;
         int avg;
 
-        PrintWriter outStream = null;
-        Scanner inStream = null;
-        try {
-            inStream = new Scanner(new File(inFile));
+
+        try (Scanner inStream = new Scanner(new File (inFile));
+            PrintWriter outStream = new PrintWriter(new File(outFile));) {
             inStream.useDelimiter("\\s+");
-            outStream = new PrintWriter(new File(outFile));
 
             do {
                 name = inStream.next();
@@ -31,7 +29,7 @@ public class gradebook {
                 }
                 avg = avg / 3;
 
-                
+
                 if (avg > 60) {
                     outStream.println("Student: " + name + " | Average: " + avg);
                 }
@@ -44,12 +42,6 @@ public class gradebook {
             System.out.println("Input mismatch");
         }
         finally {
-            if (inStream != null) {
-                inStream.close();
-            }
-            if (outStream != null) {
-                outStream.close();
-            }
             System.out.println("Processing completed");
         }
     }
