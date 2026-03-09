@@ -26,7 +26,7 @@ public class ChatApp extends Application {
     private PrintWriter writer;
     private TextField message = new TextField();
     private Label userName = new Label("User:");
-    Socket socket;
+    private Socket socket;
 
     @Override
     public void start(Stage primaryStage) {
