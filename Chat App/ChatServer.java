@@ -12,6 +12,7 @@ public class ChatServer {
     public static final int PORT = 59001;
     private static Set<PrintWriter> clientWriters = Collections.synchronizedSet(new HashSet<>());
 
+
     private static class ClientHandler extends Thread {
         private Socket socket;
 
@@ -42,6 +43,10 @@ public class ChatServer {
 
                 String message;
                 while ((message = reader.readLine()) != null) {
+                    if (message.equalsIgnoreCase("QUIT")) {
+                        writer.println("SERVER: Goodbye, " + username + "!");
+                        break;
+                        }
                     System.out.println("Received message from " + username + ": " + message);
                     broadcastMessage(username + ": " + message);
                 }
@@ -49,6 +54,13 @@ public class ChatServer {
             } catch (IOException e) {
                 System.out.println("Error handling client: " + e.getMessage());
             } finally {
+                if (username != null) {
+                    broadcastMessage("SERVER: " + username + " has left the chat.");
+                    System.out.println("User " + username + " disconnected.");
+                }
+                if (writer != null) {
+                    clientWriters.remove(writer);
+                }
                 try {
                     if (reader != null) reader.close();
                     if (writer != null) writer.close();
