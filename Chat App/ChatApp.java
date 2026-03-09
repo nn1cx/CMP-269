@@ -26,6 +26,7 @@ public class ChatApp extends Application {
     private PrintWriter writer;
     private TextField message = new TextField();
     private Label userName = new Label("User:");
+    Socket socket;
 
     @Override
     public void start(Stage primaryStage) {
@@ -71,14 +72,22 @@ public class ChatApp extends Application {
         primaryStage.setTitle("Lehman Multi-Platform Chat System");
         primaryStage.show();
 
-        primaryStage.setOnCloseRequest(e -> {
-            try {
-                if (writer != null) writer.close();
-            } catch (Exception ex) {
-                ex.printStackTrace();
+        primaryStage.setOnCloseRequest(e -> shutdown());
+    }
+
+    private void shutdown() {
+        try {
+            if (writer != null) {
+                writer.println("QUIT"); // Notify server before disconnecting
             }
+            if (socket != null && !socket.isClosed()) {
+                socket.close(); // Closing socket ends the reader loop in connectToServer()
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
             Platform.exit();
-        });
+        }
     }
 
     private String askForUsername() {
@@ -93,7 +102,7 @@ public class ChatApp extends Application {
     private void connectToServer() {
         new Thread(() -> {
             try {
-                Socket socket = new Socket(SERVER_ADDRESS, PORT);
+                socket = new Socket(SERVER_ADDRESS, PORT);
                 writer = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
@@ -117,6 +126,10 @@ public class ChatApp extends Application {
     private void sendMessage() {
         String userMessage = message.getText().trim();
         if (!userMessage.isEmpty() && writer != null) {
+            if (userMessage.equalsIgnoreCase("QUIT")) {
+                shutdown();
+                return;
+            }
             writer.println(userMessage);
             message.clear();
         }
@@ -126,3 +139,4 @@ public class ChatApp extends Application {
         launch();
     }
 }
+
