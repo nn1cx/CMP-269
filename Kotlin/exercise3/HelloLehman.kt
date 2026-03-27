@@ -9,17 +9,13 @@ import io.ktor.server.routing.*
 fun Application.configureRouting() {
     routing {
         get("/") {
-            call.respondText("Server is online at Lehman College.")
+            call.respondText("Server is online at Lehman College. BLAH")
         }
     }
 }
 
 fun main() {
     embeddedServer(Netty, port = 8080) {
-        routing {
-            get("/") {
-                call.respondText("Server is online at Lehman College.")
-            }
-        }
+        configureRouting()
     }
 }
