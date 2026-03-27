@@ -18,5 +18,5 @@ fun Application.configureRouting() {
 fun main() {
     embeddedServer(Netty, port = 8080) {
         configureRouting()
-    }
+    }.start(wait = true)
 }
