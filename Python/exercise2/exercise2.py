@@ -1,44 +1,65 @@
-class Exercise1_Student:
-    def __init__(self, name, gpa):
-        self.name = name
-        self.gpa = gpa
-        self._is_active = True
+class PaymentMethod:
+    totalTransactions = 0
 
-    def get_status(self):
-        status = "Active" if self._is_active else "Inactive"
-        return f"{self.name} is currently {status} with a {self.gpa} GPA."
+    def __init__(self, accountHolder, balance):
+        self.accountHolder = accountHolder
+        self.balance = balance
 
-class Exercise2_GradStudent(Exercise1_Student):
-    def __init__(self, name, gpa, research_lab):
-        super().__init__(name, gpa)
-        self.research_lab = research_lab
+    def incrementTotalTransactions(self):
+        PaymentMethod.totalTransactions += 1
 
-    def get_status(self):
-        base_status = super().get_status()
-        return f"{base_status} They research in the {self.research_lab} lab."
+    #def validateAccount(self):
+    #def processPayment(self, amount):
 
+class CreditCard(PaymentMethod):
+    def __init__(self, accountHolder, balance, creditLimit):
+        super().__init__(accountHolder, balance)
+        self.creditLimit = creditLimit
 
-class Robot:
-    def get_status(self):
-        return "BEEP BOOP. Robot systems nominal."
+    def processPayment(self, amount):
+        if amount > (self.balance + self.creditLimit):
+            print("Transaction Declined")
+        else:
+            if amount > self.balance:
+                remaining = amount - self.balance
+                self.balance = 0
+                self.creditLimit -= remaining
+            else:
+                self.balance -= amount
+            super().incrementTotalTransactions()
+            print(f"Transaction of ${amount} approved.")
 
-def exercise_2_polymorphism():
-    print("\n--- Exercise 2b: Polymorphism (Duck Typing) ---")
+    def getPaymentStatus(self):
+        return f"Account Holder: {self.accountHolder}, Balance: {self.balance}, Credit Limit: {self.creditLimit}"
 
-    undergrad = Exercise1_Student("Alice", 3.5)
-    grad = Exercise2_GradStudent("Bob", 3.9, "AI Data")
-    bot = Robot()
+    def validateAccount(self):
+        print(f"Validating credit card for {self.accountHolder}...")
+        print("Credit Card Validated.")
 
-    entities = [undergrad, grad, bot]
-    for entity in entities:
-        print(entity.get_status())
+class MealPlan(PaymentMethod):
+    def __init__(self, accountHolder, balance):
+        super().__init__(accountHolder, balance)
+
+    def processPayment(self, amount):
+        if amount > self.balance:
+            print("Insufficient funds in meal plan account.")
+        else:
+            self.balance -= amount
+            print(f"Transaction of ${amount} processed.")
+            super().incrementTotalTransactions()
+
+    def validateAccount(self):
+        print(f"Meal plan for {self.accountHolder} is valid.") if self.balance > 0 else print(f"Insufficient funds in meal plan account.")
+
+    def getPaymentStatus(self):
+        return f"Account Holder: {self.accountHolder}, Meal Plan Balance: {self.balance}"
 
 if __name__ == "__main__":
-    print("--- Exercise 2a: Classes and Inheritance ---")
-    student1 = Exercise1_Student("John Doe", 3.8)
-    student2 = Exercise2_GradStudent("Jane Smith", 4.0, "Cybersecurity")
+    paymentQueue = []
+    paymentQueue.append(CreditCard("Alice", 500.0, 1000.0))
+    paymentQueue.append(MealPlan("Alice", 300.0))
 
-    print(student1.get_status())
-    print(student2.get_status())
+    for persons in paymentQueue:
+        persons.processPayment(50.0)
 
-    exercise_2_polymorphism()
+    print(f"Total transactions: {PaymentMethod.totalTransactions}")
